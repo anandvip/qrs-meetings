@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meeting Outcomes Grid</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --primary-dark: #2980b9;
+            --danger-color: #e74c3c;
+            --danger-dark: #c0392b;
+            --success-color: #2ecc71;
+            --success-dark: #27ae60;
+            --neutral-color: #95a5a6;
+            --neutral-dark: #7f8c8d;
+            --background-light: #f9f9f9;
+            --border-color: #ddd;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f2f5;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .grid-item {
+            background-color: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .grid-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .grid-item h2 {
+            margin: 0 0 15px 0;
+            color: var(--primary-color);
+            font-size: 1.3em;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        ul {
+            padding-left: 20px;
+            margin-bottom: 20px;
+        }
+
+        li {
+            margin-bottom: 12px;
+            color: #555;
+        }
+
+        .task-input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        .task-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .assign-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            margin-top: 8px;
+            border-radius: 6px;
+            width: 100%;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+        }
+
+        .assign-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .assigned-task {
+            background-color: #f8f9fa;
+            padding: 10px 15px;
+            margin-top: 10px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #e9ecef;
+        }
+
+        .assigned-name {
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+        }
+
+        .assigned-name:hover {
+            background-color: #e9ecef;
+        }
+
+        .name-edit {
+            margin: 0;
+            padding: 6px 10px;
+            border: 2px solid var(--primary-color);
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: inherit;
+            width: 200px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .remove-btn, .save-btn, .cancel-btn {
+            border: none;
+            padding: 6px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 13px;
+            transition: background-color 0.2s ease;
+        }
+
+        .remove-btn {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .remove-btn:hover {
+            background-color: var(--danger-dark);
+        }
+
+        .save-btn {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .save-btn:hover {
+            background-color: var(--success-dark);
+        }
+
+        .cancel-btn {
+            background-color: var(--neutral-color);
+            color: white;
+        }
+
+        .cancel-btn:hover {
+            background-color: var(--neutral-dark);
+        }
+
+        @media print {
+            .task-input, .assign-btn, .remove-btn, .action-buttons {
+                display: none;
+            }
+            body {
+                background-color: white;
+            }
+            .grid-item {
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+            .grid-item {
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Meeting Outcomes Grid</h1>
+    <div class="grid-container" id="gridContainer"></div>
+
+    <script>
+        const meetingOutcomes = [
+            {
+                title: "Sales Strategy for Kurukshetra",
+                tasks: [
+                    "Analyze current market penetration and identify underserved segments",
+                    "Develop targeted marketing campaigns for local audiences",
+                    "Explore partnerships with local businesses, gyms, or healthcare providers"
+                ]
+            },
+            {
+                title: "Social Media Strategy (Facebook)",
+                tasks: [
+                    "Create a content calendar for regular, engaging posts about wellness",
+                    "Plan targeted ad campaigns to reach potential customers in the area",
+                    "Develop a strategy for responding to reviews and customer inquiries promptly"
+                ]
+            },
+            {
+                title: "Wellness Menu Optimization",
+                tasks: [
+                    "Review current offerings and their profitability",
+                    "Propose new services based on market trends and customer feedback",
+                    "Streamline the menu to focus on high-demand, high-margin treatments"
+                ]
+            },
+            {
+                title: "Investor Relations",
+                tasks: [
+                    "Prepare a concise update on financial performance and growth metrics",
+                    "Outline plans for scaling the business and improving profitability",
+                    "Address any concerns investors may have raised previously"
+                ]
+            },
+            {
+                title: "Team Dynamics and Professional Conduct",
+                tasks: [
+                    "Establish clear guidelines for professional behavior in the workplace",
+                    "Implement a formal conflict resolution process",
+                    "Organize team-building activities to improve relationships among staff",
+                    "Address whistleblower attitudes constructively"
+                ]
+            },
+            {
+                title: "Performance Metrics and Accountability",
+                tasks: [
+                    "Set specific, measurable goals for each department",
+                    "Implement a system for tracking progress and addressing shortfalls",
+                    "Establish regular check-ins to ensure alignment across teams"
+                ]
+            },
+            {
+                title: "Customer Experience Enhancement",
+                tasks: [
+                    "Develop a customer feedback system",
+                    "Create a loyalty program to encourage repeat visits",
+                    "Train staff on providing exceptional service consistently"
+                ]
+            },
+            {
+                title: "Operational Efficiency",
+                tasks: [
+                    "Identify areas where processes can be streamlined",
+                    "Explore technology solutions to improve booking and customer management",
+                    "Optimize staff scheduling to match peak demand periods"
+                ]
+            },
+            {
+                title: "Whistleblower Attitude Management",
+                tasks: [
+                    "Create a culture of open communication",
+                    "Establish clear policies and procedures for reporting concerns",
+                    "Educate employees on ethical decision-making and appropriate reporting channels",
+                    "Respond promptly and thoroughly to reported concerns",
+                    "Protect whistleblowers from retaliation",
+                    "Manage false or malicious reports appropriately",
+                    "Lead by example in ethical behavior"
+                ]
+            }
+        ];
+
+        // Load assignments from localStorage or initialize empty object
+        let assignments = JSON.parse(localStorage.getItem('meetingAssignments')) || {};
+
+        function saveToLocalStorage() {
+            localStorage.setItem('meetingAssignments', JSON.stringify(assignments));
+        }
+
+        function startEditing(assignmentId) {
+            const taskDiv = document.getElementById(assignmentId);
+            const nameSpan = taskDiv.querySelector('.assigned-name');
+            const currentName = nameSpan.textContent;
+            
+            const editHtml = `
+                <input type="text" class="name-edit" value="${currentName}">
+                <div class="action-buttons">
+                    <button class="save-btn" onclick="saveEdit('${assignmentId}')">✓</button>
+                    <button class="cancel-btn" onclick="cancelEdit('${assignmentId}', '${currentName}')">×</button>
+                </div>
+            `;
+            
+            taskDiv.innerHTML = editHtml;
+            const input = taskDiv.querySelector('.name-edit');
+            input.focus();
+            input.setSelectionRange(0, input.value.length);
+        }
+
+        function saveEdit(assignmentId) {
+            const taskDiv = document.getElementById(assignmentId);
+            const input = taskDiv.querySelector('.name-edit');
+            const newName = input.value.trim();
+            
+            if (newName) {
+                for (const [index, tasks] of Object.entries(assignments)) {
+                    const task = tasks.find(t => t.id === assignmentId);
+                    if (task) {
+                        task.name = newName;
+                        saveToLocalStorage();
+                        break;
+                    }
+                }
+                restoreTaskView(assignmentId, newName);
+            }
+        }
+
+        function cancelEdit(assignmentId, originalName) {
+            restoreTaskView(assignmentId, originalName);
+        }
+
+        function restoreTaskView(assignmentId, name) {
+            const taskDiv = document.getElementById(assignmentId);
+            taskDiv.innerHTML = `
+                <span class="assigned-name" onclick="startEditing('${assignmentId}')">${name}</span>
+                <button class="remove-btn" onclick="removeAssignment('${assignmentId}')">×</button>
+            `;
+        }
+
+        function removeAssignment(assignmentId) {
+            if (confirm('Are you sure you want to remove this assignment?')) {
+                const taskDiv = document.getElementById(assignmentId);
+                if (taskDiv) {
+                    for (const [index, tasks] of Object.entries(assignments)) {
+                        const taskIndex = tasks.findIndex(t => t.id === assignmentId);
+                        if (taskIndex !== -1) {
+                            tasks.splice(taskIndex, 1);
+                            if (tasks.length === 0) {
+                                delete assignments[index];
+                            }
+                            break;
+                        }
+                    }
+                    saveToLocalStorage();
+                    taskDiv.remove();
+                }
+            }
+        }
+
+        function createGridItems() {
+            const gridContainer = document.getElementById('gridContainer');
+            meetingOutcomes.forEach((outcome, index) => {
+                const gridItem = document.createElement('div');
+                gridItem.className = 'grid-item';
+                
+                let assignedTasksHtml = '';
+                if (assignments[index] && assignments[index].length > 0) {
+                    assignedTasksHtml = assignments[index].map(task => `
+                        <div id="${task.id}" class="assigned-task">
+                            <span class="assigned-name" onclick="startEditing('${task.id}')">${task.name}</span>
+                            <button class="remove-btn" onclick="removeAssignment('${task.id}')">×</button>
+                        </div>
+                    `).join('');
+                }
+
+                gridItem.innerHTML = `
+                    <h2>${outcome.title}</h2>
+                    <ul>
+                        ${outcome.tasks.map(task => `<li>${task}</li>`).join('')}
+                    </ul>
+                    <input type="text" class="task-input" placeholder="Assign to..." data-index="${index}">
+                    <button class="assign-btn" onclick="assignTask(${index})">Assign</button>
+                    <div id="assigned-tasks-${index}">
+                        ${assignedTasksHtml}
+                    </div>
+                `;
+                gridContainer.appendChild(gridItem);
+            });
+        }
+
+        function assignTask(index) {
+            const input = document.querySelector(`.grid-item:nth-child(${index + 1}) .task-input`);
+            const assignedTasksDiv = document.getElementById(`assigned-tasks-${index}`);
+            
+            if (input.value.trim() !== '') {
+                const taskId = `task-${Date.now()}`;
+                const taskHtml = `
+                    <div id="${taskId}" class="assigned-task">
+                        <span class="assigned-name" onclick="startEditing('${taskId}')">${input.value}</span>
+                        <button class="remove-btn" onclick="removeAssignment('${taskId}')">×</button>
+                    </div>
+                `;
+                assignedTasksDiv.insertAdjacentHTML('beforeend', taskHtml);
+                
+                if (!assignments[index]) {
+                    assignments[index] = [];
+                }
+                assignments[index].push({
+                    id: taskId,
+                    name: input.value
+                });
+                saveToLocalStorage();
+                
+                input.value = '';
+            }
+        }
+
+        // Handle Enter key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                const activeElement = document.activeElement;
+                if (activeElement.classList.contains('name-edit')) {
+                    const taskDiv = activeElement.closest('.assigned-task');
+                    saveEdit(taskDiv.id);
+                } else if (activeElement.classList.contains('task-input')) {
+                    const index = activeElement.dataset.index;
+                    assignTask(parseInt(index));
+                }
+            }
+        });
+
+        // Initialize
+        createGridItems();
+    </script>
+</body>
+</html>
